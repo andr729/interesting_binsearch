@@ -1,29 +1,24 @@
 #include <iostream>
 #include <cstdint>
+#include <vector>
 
 using u64 = uint64_t;
 using i64 = int64_t;
 
 constexpr u64 INF = 1e18;
 
-// enum class Hit {
-//     Left, Right
-// };
 
-auto func(i64 n) {
+auto func(i64 n, i64 range_len) {
     
-    // std::cin >> n;
-    // std::cin >> print_len;
-
     i64 value[n+1][n+1];
-    i64 move[n+1][n+1];
+    std::vector<i64> moves[n+1][n+1];
 
     for (i64 len = 0; len <= n; len++) {
         for (i64 begin = 0; begin + len <= n; begin++) {
             auto end = begin + len;
             if (len <= 1) {
                 value[begin][end] = 0;
-                move[begin][end] = -1;
+                moves[begin][end] = {};
             }
             else {
                 i64 pessimistic_cost = INF;
@@ -31,17 +26,27 @@ auto func(i64 n) {
                     auto left_cost = hit + 1 + value[begin][hit + 1];
                     auto right_cost = n - hit - 1 + value[hit + 1][end];
                     auto new_value = std::max(left_cost, right_cost);
-                    pessimistic_cost = std::min(
-                        pessimistic_cost,
-                        new_value
-                    );
+                    
+                    if (new_value < pessimistic_cost) {
+                        pessimistic_cost = new_value;
+                        moves[begin][end].clear();
+                    }
+
                     if (pessimistic_cost == new_value) {
-                        move[begin][end] = hit;
+                        moves[begin][end].push_back(hit);
                     }
                 }
                 value[begin][end] = pessimistic_cost;       
             }
         }
+    }
+
+    for (i64 b = 0; b + range_len <= n; b++) {
+        auto e = b + range_len;
+        for (auto m : moves[b][e]) {
+            std::cout << m - b << " ";
+        }
+        std::cout << "\n";   
     }
 
     // std::cout << value[0][n] << "\n\n";
@@ -69,10 +74,6 @@ auto func(i64 n) {
 
 
 int main() {
-
-    for (int i = 2; i < 40; i += 2) {
-        std::cout << func(i) << ", ";
-    }
-    std::cout << "\n";
+    func(128, 16);
 
 }
